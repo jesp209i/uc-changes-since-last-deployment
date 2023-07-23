@@ -1,4 +1,5 @@
 import {HttpClient, MediaTypes, Headers } from '@actions/http-client';
+import { debug } from '@actions/core';
 import { OutgoingHttpHeaders } from 'http';
 import { createWriteStream } from 'fs';
 
@@ -32,7 +33,7 @@ export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string
 
     const client = new HttpClient();
     var response = await client.getJson<DeploymentsResponse>(`${baseUrl}?skip=0&take=1`, headers);
-
+    debug(`${response.statusCode} - ${JSON.stringify(response.result)}`);
     if (response.statusCode === 200 && response.result !== null)
     {
         return Promise.resolve(response.result.deployments[0].deploymentId);

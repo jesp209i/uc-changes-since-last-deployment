@@ -718,7 +718,7 @@ var require_tunnel = __commonJS({
         connectOptions.headers = connectOptions.headers || {};
         connectOptions.headers["Proxy-Authorization"] = "Basic " + new Buffer(connectOptions.proxyAuth).toString("base64");
       }
-      debug("making CONNECT request");
+      debug2("making CONNECT request");
       var connectReq = self.request(connectOptions);
       connectReq.useChunkedEncodingByDefault = false;
       connectReq.once("response", onResponse);
@@ -738,7 +738,7 @@ var require_tunnel = __commonJS({
         connectReq.removeAllListeners();
         socket.removeAllListeners();
         if (res.statusCode !== 200) {
-          debug(
+          debug2(
             "tunneling socket could not be established, statusCode=%d",
             res.statusCode
           );
@@ -750,7 +750,7 @@ var require_tunnel = __commonJS({
           return;
         }
         if (head.length > 0) {
-          debug("got illegal response body from proxy");
+          debug2("got illegal response body from proxy");
           socket.destroy();
           var error = new Error("got illegal response body from proxy");
           error.code = "ECONNRESET";
@@ -758,13 +758,13 @@ var require_tunnel = __commonJS({
           self.removeSocket(placeholder);
           return;
         }
-        debug("tunneling connection has established");
+        debug2("tunneling connection has established");
         self.sockets[self.sockets.indexOf(placeholder)] = socket;
         return cb(socket);
       }
       function onError(cause) {
         connectReq.removeAllListeners();
-        debug(
+        debug2(
           "tunneling socket could not be established, cause=%s\n",
           cause.message,
           cause.stack
@@ -826,9 +826,9 @@ var require_tunnel = __commonJS({
       }
       return target;
     }
-    var debug;
+    var debug2;
     if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
-      debug = function() {
+      debug2 = function() {
         var args = Array.prototype.slice.call(arguments);
         if (typeof args[0] === "string") {
           args[0] = "TUNNEL: " + args[0];
@@ -838,10 +838,10 @@ var require_tunnel = __commonJS({
         console.error.apply(console, args);
       };
     } else {
-      debug = function() {
+      debug2 = function() {
       };
     }
-    exports.debug = debug;
+    exports.debug = debug2;
   }
 });
 
@@ -2127,10 +2127,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       return process.env["RUNNER_DEBUG"] === "1";
     }
     exports.isDebug = isDebug;
-    function debug(message) {
+    function debug2(message) {
       command_1.issueCommand("debug", {}, message);
     }
-    exports.debug = debug;
+    exports.debug = debug2;
     function error(message, properties = {}) {
       command_1.issueCommand("error", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
@@ -2386,10 +2386,11 @@ var require_io_util = __commonJS({
 });
 
 // src/index.ts
-var import_core = __toESM(require_core());
+var import_core2 = __toESM(require_core());
 
 // src/getChangesDeploymentApi.ts
 var import_http_client = __toESM(require_lib());
+var import_core = __toESM(require_core());
 var import_fs = require("fs");
 function generateHeaders(apiKey) {
   return {
@@ -2401,6 +2402,7 @@ async function getLatestDeploymentFromApi(baseUrl, apiKey) {
   const headers = generateHeaders(apiKey);
   const client = new import_http_client.HttpClient();
   var response = await client.getJson(`${baseUrl}?skip=0&take=1`, headers);
+  (0, import_core.debug)(`${response.statusCode} - ${JSON.stringify(response.result)}`);
   if (response.statusCode === 200 && response.result !== null) {
     return Promise.resolve(response.result.deployments[0].deploymentId);
   }
@@ -2424,27 +2426,25 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
 // src/index.ts
 var import_io_util = __toESM(require_io_util());
 async function run() {
-  const projectAlias = (0, import_core.getInput)("project-alias");
-  const apiKey = (0, import_core.getInput)("api-key");
-  const workspace = (0, import_core.getInput)("workspace");
+  const projectAlias = (0, import_core2.getInput)("project-alias");
+  const apiKey = (0, import_core2.getInput)("api-key");
+  const workspace = (0, import_core2.getInput)("workspace");
   const baseUrl = `https://api-internal.umbraco.io/projects/${projectAlias}/deployments`;
   let latestdeploymentId = "";
-  await getLatestDeploymentFromApi(baseUrl, apiKey).then((resolve) => latestdeploymentId = resolve).catch((rejected) => (0, import_core.setFailed)(rejected));
+  getLatestDeploymentFromApi(baseUrl, apiKey).then((resolve) => latestdeploymentId = resolve).catch((rejected) => (0, import_core2.setFailed)(rejected));
+  (0, import_core2.info)(latestdeploymentId);
   const placeForPatch = `${workspace}/download/git-changes.patch`;
-  getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).then(
-    () => success(placeForPatch),
-    () => (0, import_core.setFailed)("Unknown Error - unable to determine what happened :(")
-  );
+  getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).then(() => success(placeForPatch)).catch((rejected) => (0, import_core2.setFailed)(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
 }
 async function success(patchfileLocation) {
   const patchFileExists = await (0, import_io_util.exists)(patchfileLocation);
   if (patchFileExists) {
-    (0, import_core.warning)(`Changes since last deployment was detected - see ${patchfileLocation}`);
-    (0, import_core.setOutput)("remote-changes", true);
-    (0, import_core.setOutput)("git-patch-file", patchfileLocation);
+    (0, import_core2.warning)(`Changes since last deployment was detected - see ${patchfileLocation}`);
+    (0, import_core2.setOutput)("remote-changes", true);
+    (0, import_core2.setOutput)("git-patch-file", patchfileLocation);
     return;
   }
-  (0, import_core.info)("No remote changes");
-  (0, import_core.setOutput)("remote-changes", false);
+  (0, import_core2.info)("No remote changes");
+  (0, import_core2.setOutput)("remote-changes", false);
 }
 run();

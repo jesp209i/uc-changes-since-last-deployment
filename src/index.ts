@@ -12,15 +12,15 @@ async function run()
 
     let latestdeploymentId: string = '';
 
-    await getLatestDeploymentFromApi(baseUrl,apiKey)
+    getLatestDeploymentFromApi(baseUrl,apiKey)
     .then(resolve => latestdeploymentId = resolve)
     .catch(rejected => setFailed(rejected));
-
+    info(latestdeploymentId);
     const placeForPatch = `${workspace}/download/git-changes.patch`;
 
     getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch)
-    .then(()=>success(placeForPatch),
-    ()=> setFailed("Unknown Error - unable to determine what happened :("));
+    .then(()=>success(placeForPatch))
+    .catch(rejected => setFailed(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
 
 
 }
