@@ -1,0 +1,23 @@
+---
+name: Check and get changes since last Deployment
+description: hello
+inputs:
+  project-alias:
+    description: the project alias for the project you are running a deployment on
+    required: true
+  api-key:
+    description: key needed to have access to api
+    required: true
+  workspace:
+    description: github workspace
+    required: true
+outputs:
+  remote-changes:
+    description: set to true if cloud repo is ahead of latest deployment id
+  git-patch-file:
+    description: path to git patch file, with changes since last deployment, if there was any changes in cloud remote since then
+
+  
+runs:
+  using: node16
+  main: action/index.js
