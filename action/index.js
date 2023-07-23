@@ -2401,8 +2401,8 @@ async function getLatestDeploymentFromApi(baseUrl, apiKey) {
   const headers = generateHeaders(apiKey);
   const client = new import_http_client.HttpClient();
   var response = await client.getJson(`${baseUrl}?skip=0&take=1`, headers);
-  if (response.statusCode === 200 && response.result?.length === 1) {
-    return Promise.resolve(response.result[0].deploymentId);
+  if (response.statusCode === 200 && response.result !== null) {
+    return Promise.resolve(response.result.deployments[0].deploymentId);
   }
   return Promise.reject(`Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
 }

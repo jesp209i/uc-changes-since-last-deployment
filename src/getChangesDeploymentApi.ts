@@ -2,7 +2,12 @@ import {HttpClient, MediaTypes, Headers } from '@actions/http-client';
 import { OutgoingHttpHeaders } from 'http';
 import { createWriteStream } from 'fs';
 
-export interface DeploymentStatusResponse {
+export interface DeploymentsResponse{
+    "projectAlias": string,
+    "deployments": Array<DeploymentStatus>
+}
+
+export interface DeploymentStatus {
     "deploymentId": string,
     "projectAlias": string,
     "deploymentState": string,
@@ -26,11 +31,11 @@ export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string
     const headers = generateHeaders(apiKey);
 
     const client = new HttpClient();
-    var response = await client.getJson<Array<DeploymentStatusResponse>>(`${baseUrl}?skip=0&take=1`, headers);
+    var response = await client.getJson<DeploymentsResponse>(`${baseUrl}?skip=0&take=1`, headers);
 
-    if (response.statusCode === 200 && response.result?.length === 1)
+    if (response.statusCode === 200 && response.result !== null)
     {
-        return Promise.resolve(response.result[0].deploymentId);
+        return Promise.resolve(response.result.deployments[0].deploymentId);
     }
 
     return Promise.reject(`Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
