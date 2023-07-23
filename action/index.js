@@ -2404,7 +2404,7 @@ async function getLatestDeploymentFromApi(baseUrl, apiKey) {
   if (response.statusCode === 200 && response.result?.length === 1) {
     return Promise.resolve(response.result[0].deploymentId);
   }
-  return Promise.reject(`Unexpected response coming from server. ${response.statusCode} - ${response.result} `);
+  return Promise.reject(`Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
 }
 async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   const headers = generateHeaders(apiKey);
@@ -2428,9 +2428,10 @@ async function run() {
   const apiKey = (0, import_core.getInput)("api-key");
   const workspace = (0, import_core.getInput)("workspace");
   const baseUrl = `https://api-internal.umbraco.io/projects/${projectAlias}/deployments`;
-  const latestDeployment = await getLatestDeploymentFromApi(baseUrl, apiKey);
+  let latestdeploymentId = "";
+  await getLatestDeploymentFromApi(baseUrl, apiKey).then((resolve) => latestdeploymentId = resolve).catch((rejected) => (0, import_core.setFailed)(rejected));
   const placeForPatch = `${workspace}/download/git-changes.patch`;
-  getChanges(baseUrl, apiKey, latestDeployment, placeForPatch).then(
+  getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).then(
     () => success(placeForPatch),
     () => (0, import_core.setFailed)("Unknown Error - unable to determine what happened :(")
   );

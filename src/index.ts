@@ -10,11 +10,15 @@ async function run()
 
     const baseUrl = `https://api-internal.umbraco.io/projects/${projectAlias}/deployments`;
 
-    const latestDeployment = await getLatestDeploymentFromApi(baseUrl,apiKey);
+    let latestdeploymentId: string = '';
+
+    await getLatestDeploymentFromApi(baseUrl,apiKey)
+    .then(resolve => latestdeploymentId = resolve)
+    .catch(rejected => setFailed(rejected));
 
     const placeForPatch = `${workspace}/download/git-changes.patch`;
 
-    getChanges(baseUrl, apiKey, latestDeployment, placeForPatch)
+    getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch)
     .then(()=>success(placeForPatch),
     ()=> setFailed("Unknown Error - unable to determine what happened :("));
 

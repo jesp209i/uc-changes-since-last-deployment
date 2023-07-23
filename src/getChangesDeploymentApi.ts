@@ -33,7 +33,7 @@ export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string
         return Promise.resolve(response.result[0].deploymentId);
     }
 
-    return Promise.reject(`Unexpected response coming from server. ${response.statusCode} - ${response.result} `);
+    return Promise.reject(`Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
 }
 
 export async function getChanges(baseUrl: string, apiKey: string, latestdeploymentId: string, downloadFolder: string) : Promise<void>
