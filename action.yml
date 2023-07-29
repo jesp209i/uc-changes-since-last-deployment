@@ -12,12 +12,11 @@ inputs:
     description: github workspace
     required: true
 outputs:
-  remote-changes:
+  REMOTE_CHANGES:
     description: set to true if cloud repo is ahead of latest deployment id
-  git-patch-file:
+  PATCH_FILE:
     description: path to git patch file, with changes since last deployment, if there was any changes in cloud remote since then
 
-  
 runs:
   using: node16
   main: action/index.js

@@ -27,7 +27,7 @@ function generateHeaders(apiKey:string) : OutgoingHttpHeaders
     };
 }
 
-export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string): Promise<string>
+export async function getLatestDeployment(baseUrl: string, apiKey: string): Promise<string>
 {
     const generatedUrl = `${baseUrl}?skip=0&take=1`;
 
@@ -44,7 +44,7 @@ export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string
     return Promise.reject(`getLatestDeploymentFromApi: Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
 }
 
-export async function getChanges(baseUrl: string, apiKey: string, latestdeploymentId: string, downloadFolder: string) : Promise<void>
+export async function getDiff(baseUrl: string, apiKey: string, latestdeploymentId: string, downloadFolder: string) : Promise<void>
 {
     return await new Promise(async (resolve, reject) => {
 
@@ -76,7 +76,7 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
         else 
         {
             //info(`${response.message.statusCode}`);
-            return reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
+            return reject(`getDiff: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
         }
     });
 }

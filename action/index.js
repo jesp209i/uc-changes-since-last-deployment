@@ -2651,7 +2651,7 @@ function generateHeaders(apiKey) {
     "Umbraco-Api-Key": apiKey
   };
 }
-async function getLatestDeploymentFromApi(baseUrl, apiKey) {
+async function getLatestDeployment(baseUrl, apiKey) {
   const generatedUrl = `${baseUrl}?skip=0&take=1`;
   const headers = generateHeaders(apiKey);
   const client = new import_http_client.HttpClient();
@@ -2661,7 +2661,7 @@ async function getLatestDeploymentFromApi(baseUrl, apiKey) {
   }
   return Promise.reject(`getLatestDeploymentFromApi: Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
 }
-async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
+async function getDiff(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   return await new Promise(async (resolve, reject) => {
     const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
     const headers = generateHeaders(apiKey);
@@ -2681,7 +2681,7 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
         file.close(() => resolve());
       });
     } else {
-      return reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
+      return reject(`getDiff: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
     }
   });
 }
@@ -2694,30 +2694,30 @@ async function run() {
   const apiKey = (0, import_core2.getInput)("api-key");
   const workspace = (0, import_core2.getInput)("workspace");
   const baseUrl = `https://api-internal.umbraco.io/projects/${projectAlias}/deployments`;
-  const latestdeploymentId = await getLatestDeploymentFromApi(baseUrl, apiKey).catch((rejected) => (0, import_core2.setFailed)(rejected));
+  const latestdeploymentId = await getLatestDeployment(baseUrl, apiKey).catch((rejected) => (0, import_core2.setFailed)(rejected));
   if (latestdeploymentId !== null || void 0) {
-    (0, import_core2.info)(`Found latest deploymentId: ${latestdeploymentId}`);
+    (0, import_core2.info)(`Latest deploymentId: ${latestdeploymentId}`);
     const downloadPath = `${workspace}/download`;
     (0, import_io.mkdirP)(downloadPath);
     const placeForPatch = `${downloadPath}/git-changes.patch`;
-    await getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).catch((rejected) => (0, import_core2.setFailed)(`GetDiff - Unable to determine what happened :( ${rejected}`));
+    await getDiff(baseUrl, apiKey, latestdeploymentId, placeForPatch).catch((rejected) => (0, import_core2.setFailed)(`GetDiff - Unable to determine what happened :( ${rejected}`));
     success(placeForPatch);
     return;
+  } else {
+    (0, import_core2.info)("No latest deploymentId");
+    (0, import_core2.setOutput)("REMOTE_CHANGES", "false");
+    (0, import_core2.setFailed)("fail on purpose for now");
   }
-  (0, import_core2.info)("No latest deploymentId");
-  (0, import_core2.setOutput)("remote-changes", false);
-  (0, import_core2.setFailed)("fail on purpose for now");
 }
 async function success(patchfileLocation) {
   const patchFileExists = await (0, import_io_util.exists)(patchfileLocation);
   if (patchFileExists) {
     (0, import_core2.warning)(`Changes since last deployment was detected - see ${patchfileLocation}`);
-    (0, import_core2.setOutput)("remote-changes", true);
-    (0, import_core2.setOutput)("git-patch-file", patchfileLocation);
-    return;
+    (0, import_core2.setOutput)("REMOTE_CHANGES", "true");
+    (0, import_core2.setOutput)("PATCH_FILE", patchfileLocation);
   } else {
     (0, import_core2.info)("No remote changes");
-    (0, import_core2.setOutput)("remote-changes", false);
+    (0, import_core2.setOutput)("REMOTE_CHANGES", "false");
   }
 }
 run();
