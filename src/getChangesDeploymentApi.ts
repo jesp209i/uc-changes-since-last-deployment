@@ -49,6 +49,8 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
     const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
 
     const headers = generateHeaders(apiKey);
+    headers[Headers.ContentType] = 'text/plan';
+
     const client = new HttpClient();
     const response = await client.get(generatedUrl, headers);
 
@@ -65,6 +67,7 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
         const file = createWriteStream(downloadFolder);
         let data = '';
         response.message.pipe(file);
+        file.on('error', (error) => Promise.reject(error));
         file.on('finish', () => info('finished reading stream'))
         return Promise.resolve();
     }

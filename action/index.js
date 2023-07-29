@@ -2664,6 +2664,7 @@ async function getLatestDeploymentFromApi(baseUrl, apiKey) {
 async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
   const headers = generateHeaders(apiKey);
+  headers[import_http_client.Headers.ContentType] = "text/plan";
   const client = new import_http_client.HttpClient();
   const response = await client.get(generatedUrl, headers);
   (0, import_core.info)(`${response.message.statusCode}`);
@@ -2675,6 +2676,7 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
     const file = (0, import_fs.createWriteStream)(downloadFolder);
     let data = "";
     response.message.pipe(file);
+    file.on("error", (error) => Promise.reject(error));
     file.on("finish", () => (0, import_core.info)("finished reading stream"));
     return Promise.resolve();
   }
