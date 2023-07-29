@@ -24,9 +24,10 @@ async function run()
 
         const placeForPatch = `${downloadPath}/git-changes.patch`;
 
-        getChanges(baseUrl, apiKey, latestdeploymentId!, placeForPatch)
-        .then(()=>success(placeForPatch))
+        await getChanges(baseUrl, apiKey, latestdeploymentId!, placeForPatch)
         .catch(rejected => setFailed(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
+
+        success(placeForPatch);
         return;
     }
 
@@ -43,10 +44,12 @@ async function success(patchfileLocation: string){
         setOutput('remote-changes', true);
         setOutput('git-patch-file', patchfileLocation);
         return;
+    } 
+    else 
+    {
+        info("No remote changes");
+        setOutput('remote-changes', false);
     }
-
-    info("No remote changes");
-    setOutput('remote-changes', false);
 }
 
 

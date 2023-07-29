@@ -1,4 +1,5 @@
 import {HttpClient, MediaTypes, Headers } from '@actions/http-client';
+import { info } from '@actions/core';
 import { OutgoingHttpHeaders } from 'http';
 import { createWriteStream } from 'fs';
 
@@ -51,7 +52,10 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
     const client = new HttpClient();
     const response = await client.get(generatedUrl, headers);
 
+    info(`${response.message.statusCode}`);
+    
     if (response.message.statusCode === 204) {
+
         return Promise.resolve();
     }
 
