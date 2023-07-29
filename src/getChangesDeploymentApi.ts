@@ -53,12 +53,14 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
     const response = await client.get(generatedUrl, headers);
 
     info(`${response.message.statusCode}`);
-    
+
     if (response.message.statusCode === 204) {
 
         return Promise.resolve();
     }
 
+    info(JSON.stringify(response));
+    
     if (response.message.statusCode === 200){
         const file = createWriteStream(`${downloadFolder}`);
         response.message.pipe(file).on('close', () => file.end());

@@ -2670,6 +2670,7 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   if (response.message.statusCode === 204) {
     return Promise.resolve();
   }
+  (0, import_core.info)(JSON.stringify(response));
   if (response.message.statusCode === 200) {
     const file = (0, import_fs.createWriteStream)(`${downloadFolder}`);
     response.message.pipe(file).on("close", () => file.end());
