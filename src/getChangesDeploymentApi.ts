@@ -1,5 +1,5 @@
 import {HttpClient, MediaTypes, Headers } from '@actions/http-client';
-import { debug } from '@actions/core';
+import { info } from '@actions/core';
 import { OutgoingHttpHeaders } from 'http';
 import { createWriteStream } from 'fs';
 
@@ -31,13 +31,13 @@ export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string
 {
     const generatedUrl = `${baseUrl}?skip=0&take=1`;
 
-    debug(generatedUrl);
+    info(generatedUrl);
 
     const headers = generateHeaders(apiKey);
 
     const client = new HttpClient();
     var response = await client.getJson<DeploymentsResponse>(generatedUrl, headers);
-    debug(`${response.statusCode} - ${JSON.stringify(response.result)}`);
+    info(`${response.statusCode} - ${JSON.stringify(response.result)}`);
     if (response.statusCode === 200 && response.result !== null)
     {
         return Promise.resolve(response.result.deployments[0].deploymentId);
@@ -48,9 +48,13 @@ export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string
 
 export async function getChanges(baseUrl: string, apiKey: string, latestdeploymentId: string, downloadFolder: string) : Promise<void>
 {
+    const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
+
+    info(generatedUrl);
+
     const headers = generateHeaders(apiKey);
     const client = new HttpClient();
-    const response = await client.get(`${baseUrl}/${latestdeploymentId}/diff`, headers);
+    const response = await client.get(generatedUrl, headers);
 
     if (response.message.statusCode === 204) {
         return Promise.resolve();
