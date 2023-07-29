@@ -46,34 +46,37 @@ export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string
 
 export async function getChanges(baseUrl: string, apiKey: string, latestdeploymentId: string, downloadFolder: string) : Promise<void>
 {
-    const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
+    return await new Promise(async (resolve, reject) => {
 
-    const headers = generateHeaders(apiKey);
-    headers[Headers.ContentType] = 'text/plan';
+        const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
 
-    const client = new HttpClient();
-    const response = await client.get(generatedUrl, headers);
+        const headers = generateHeaders(apiKey);
 
-    info(`${response.message.statusCode}`);
+        const client = new HttpClient();
 
-    if (response.message.statusCode === 204) {
+        const response = await client.get(generatedUrl, headers);
 
-        return Promise.resolve();
-    }
+        info(`${response.message.statusCode}`);
 
-    if (response.message.statusCode === 200){
-        const file = createWriteStream(downloadFolder);
-        response.message.pipe(file);
-        response.message.on('error', (error)=> Promise.reject(error));
-        file.on('error', (error) => Promise.reject(error));
-        file.on('finish', () => {
-            info('finished reading stream');
-            file.close(() => Promise.resolve());
-        });
-    }
-    else 
-    {
-        //info(`${response.message.statusCode}`);
-        return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
-    }
+        if (response.message.statusCode === 204) {
+
+            return resolve();
+        }
+
+        if (response.message.statusCode === 200){
+            const file = createWriteStream(downloadFolder);
+            response.message.pipe(file);
+            response.message.on('error', (error)=> reject(error));
+            file.on('error', (error) => Promise.reject(error));
+            file.on('finish', () => {
+                info('finished reading stream');
+                file.close(() => resolve());
+            });
+        }
+        else 
+        {
+            //info(`${response.message.statusCode}`);
+            return reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
+        }
+    });
 }

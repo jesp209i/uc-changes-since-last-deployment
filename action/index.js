@@ -2662,27 +2662,28 @@ async function getLatestDeploymentFromApi(baseUrl, apiKey) {
   return Promise.reject(`getLatestDeploymentFromApi: Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
 }
 async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
-  const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
-  const headers = generateHeaders(apiKey);
-  headers[import_http_client.Headers.ContentType] = "text/plan";
-  const client = new import_http_client.HttpClient();
-  const response = await client.get(generatedUrl, headers);
-  (0, import_core.info)(`${response.message.statusCode}`);
-  if (response.message.statusCode === 204) {
-    return Promise.resolve();
-  }
-  if (response.message.statusCode === 200) {
-    const file = (0, import_fs.createWriteStream)(downloadFolder);
-    response.message.pipe(file);
-    response.message.on("error", (error) => Promise.reject(error));
-    file.on("error", (error) => Promise.reject(error));
-    file.on("finish", () => {
-      (0, import_core.info)("finished reading stream");
-      file.close(() => Promise.resolve());
-    });
-  } else {
-    return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
-  }
+  return await new Promise(async (resolve, reject) => {
+    const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
+    const headers = generateHeaders(apiKey);
+    const client = new import_http_client.HttpClient();
+    const response = await client.get(generatedUrl, headers);
+    (0, import_core.info)(`${response.message.statusCode}`);
+    if (response.message.statusCode === 204) {
+      return resolve();
+    }
+    if (response.message.statusCode === 200) {
+      const file = (0, import_fs.createWriteStream)(downloadFolder);
+      response.message.pipe(file);
+      response.message.on("error", (error) => reject(error));
+      file.on("error", (error) => Promise.reject(error));
+      file.on("finish", () => {
+        (0, import_core.info)("finished reading stream");
+        file.close(() => resolve());
+      });
+    } else {
+      return reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
+    }
+  });
 }
 
 // src/index.ts
