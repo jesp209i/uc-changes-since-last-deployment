@@ -60,10 +60,12 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
     }
 
     info(JSON.stringify(response));
-    
+
     if (response.message.statusCode === 200){
-        const file = createWriteStream(`${downloadFolder}`);
-        response.message.pipe(file).on('close', () => file.end());
+        const file = createWriteStream(downloadFolder);
+        let data = '';
+        response.message.pipe(file);
+        file.on('finish', () => info('finished reading stream'))
         return Promise.resolve();
     }
 

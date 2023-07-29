@@ -2672,8 +2672,10 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   }
   (0, import_core.info)(JSON.stringify(response));
   if (response.message.statusCode === 200) {
-    const file = (0, import_fs.createWriteStream)(`${downloadFolder}`);
-    response.message.pipe(file).on("close", () => file.end());
+    const file = (0, import_fs.createWriteStream)(downloadFolder);
+    let data = "";
+    response.message.pipe(file);
+    file.on("finish", () => (0, import_core.info)("finished reading stream"));
     return Promise.resolve();
   }
   return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
