@@ -61,12 +61,8 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
         return Promise.resolve();
     }
 
-    info(await response.readBody());
-
     if (response.message.statusCode === 200){
-        info(JSON.stringify(response));
         const file = createWriteStream(downloadFolder);
-        let data = '';
         response.message.pipe(file);
         response.message.on('error', (error)=> Promise.reject(error));
         file.on('error', (error) => Promise.reject(error));

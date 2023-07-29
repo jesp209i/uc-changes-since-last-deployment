@@ -2671,11 +2671,8 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   if (response.message.statusCode === 204) {
     return Promise.resolve();
   }
-  (0, import_core.info)(await response.readBody());
   if (response.message.statusCode === 200) {
-    (0, import_core.info)(JSON.stringify(response));
     const file = (0, import_fs.createWriteStream)(downloadFolder);
-    let data = "";
     response.message.pipe(file);
     response.message.on("error", (error) => Promise.reject(error));
     file.on("error", (error) => Promise.reject(error));
