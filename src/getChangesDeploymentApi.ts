@@ -57,7 +57,7 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
 
     if (response.message.statusCode === 200){
         const file = createWriteStream(`${downloadFolder}`);
-        response.message.pipe(file).on('close', () => Promise.resolve());
+        response.message.pipe(file).on('close', () => file.end());
         return Promise.resolve();
     }
 

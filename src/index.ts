@@ -1,6 +1,7 @@
 import { getInput, info, setFailed, warning, setOutput } from '@actions/core';
 import { getLatestDeploymentFromApi, getChanges } from './getChangesDeploymentApi';
 import { exists } from '@actions/io/lib/io-util';
+import { mkdirP } from '@actions/io';
 
 async function run() 
 {
@@ -17,7 +18,11 @@ async function run()
 
         info(`Found latest deploymentId: ${latestdeploymentId}`);
 
-        const placeForPatch = `${workspace}/download/git-changes.patch`;
+        const downloadPath = `${workspace}/download`;
+
+        mkdirP(downloadPath);
+
+        const placeForPatch = `${downloadPath}/git-changes.patch`;
 
         getChanges(baseUrl, apiKey, latestdeploymentId!, placeForPatch)
         .then(()=>success(placeForPatch))
