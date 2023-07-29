@@ -2486,7 +2486,7 @@ var require_io = __commonJS({
           }
           if (destExists) {
             if (options.force == null || options.force) {
-              yield rmRF(dest);
+              yield rmRF2(dest);
             } else {
               throw new Error("Destination already exists");
             }
@@ -2497,7 +2497,7 @@ var require_io = __commonJS({
       });
     }
     exports.mv = mv;
-    function rmRF(inputPath) {
+    function rmRF2(inputPath) {
       return __awaiter(this, void 0, void 0, function* () {
         if (ioUtil.IS_WINDOWS) {
           if (/[*"<>|]/.test(inputPath)) {
@@ -2516,7 +2516,7 @@ var require_io = __commonJS({
         }
       });
     }
-    exports.rmRF = rmRF;
+    exports.rmRF = rmRF2;
     function mkdirP2(fsPath) {
       return __awaiter(this, void 0, void 0, function* () {
         assert_1.ok(fsPath, "a path argument must be provided");
@@ -3289,10 +3289,11 @@ async function getDiff(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
 
 // src/index.ts
 var import_io_util = __toESM(require_io_util());
-var import_io = __toESM(require_io());
+var import_io2 = __toESM(require_io());
 
 // src/patcher.ts
 var import_exec = __toESM(require_exec());
+var import_io = __toESM(require_io());
 async function patch(patchFileLocation, githubToken, run2) {
   return new Promise((resolve, reject) => {
     try {
@@ -3301,7 +3302,8 @@ async function patch(patchFileLocation, githubToken, run2) {
       (0, import_exec.exec)("git", ["config", "user.email", "cicd@umbraco.com"]);
       (0, import_exec.exec)("git", ["switch", "-c", `${branchName}`]);
       (0, import_exec.exec)("git", ["apply", "-v", `${patchFileLocation}`]);
-      (0, import_exec.exec)("git", ["commit", "-m", `"Auto Updated changes from remote for build ${run2}"`]);
+      (0, import_io.rmRF)(patchFileLocation);
+      (0, import_exec.exec)("git", ["commit", "-a", "-m", `"Auto Updated changes from remote for build ${run2}"`]);
       (0, import_exec.exec)("git", ["remote", "add", "tmp-pusher", `https://${githubToken}@github.com/jesp209i/pipelines-r-us`]);
       (0, import_exec.exec)("git", ["push", "--set-upstream", "tmp-pusher", `${branchName}`]);
       return resolve();
@@ -3323,7 +3325,7 @@ async function run() {
   if (latestdeploymentId !== null || void 0) {
     (0, import_core2.info)(`Latest deploymentId: ${latestdeploymentId}`);
     const downloadPath = `${workspace}/download`;
-    (0, import_io.mkdirP)(downloadPath);
+    (0, import_io2.mkdirP)(downloadPath);
     const placeForPatch = `${downloadPath}/git-changes.patch`;
     await getDiff(baseUrl, apiKey, latestdeploymentId, placeForPatch).catch((rejected) => (0, import_core2.setFailed)(`GetDiff - Unable to determine what happened :( ${rejected}`));
     success(placeForPatch, githubToken, currentRun);
