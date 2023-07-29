@@ -1,5 +1,4 @@
 import {HttpClient, MediaTypes, Headers } from '@actions/http-client';
-import { info } from '@actions/core';
 import { OutgoingHttpHeaders } from 'http';
 import { createWriteStream } from 'fs';
 
@@ -31,13 +30,11 @@ export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string
 {
     const generatedUrl = `${baseUrl}?skip=0&take=1`;
 
-    info(generatedUrl);
-
     const headers = generateHeaders(apiKey);
 
     const client = new HttpClient();
     var response = await client.getJson<DeploymentsResponse>(generatedUrl, headers);
-    info(`${response.statusCode} - ${JSON.stringify(response.result)}`);
+    
     if (response.statusCode === 200 && response.result !== null)
     {
         return Promise.resolve(response.result.deployments[0].deploymentId);
@@ -49,8 +46,6 @@ export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string
 export async function getChanges(baseUrl: string, apiKey: string, latestdeploymentId: string, downloadFolder: string) : Promise<void>
 {
     const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
-
-    info(generatedUrl);
 
     const headers = generateHeaders(apiKey);
     const client = new HttpClient();
@@ -66,5 +61,5 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
         return Promise.resolve();
     }
 
-    return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${response.readBody()} `);
+    return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
 }

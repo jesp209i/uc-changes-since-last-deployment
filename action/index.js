@@ -1136,12 +1136,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info3 = this._prepareRequest(verb, parsedUrl, headers);
+          let info2 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info3, data);
+            response = yield this.requestRaw(info2, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -1151,7 +1151,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info3, data);
+                return authenticationHandler.handleAuthentication(this, info2, data);
               } else {
                 return response;
               }
@@ -1174,8 +1174,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info3 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info3, data);
+              info2 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info2, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -1204,7 +1204,7 @@ var require_lib = __commonJS({
        * @param info
        * @param data
        */
-      requestRaw(info3, data) {
+      requestRaw(info2, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -1216,7 +1216,7 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info3, data, callbackForResult);
+            this.requestRawWithCallback(info2, data, callbackForResult);
           });
         });
       }
@@ -1226,12 +1226,12 @@ var require_lib = __commonJS({
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info3, data, onResult) {
+      requestRawWithCallback(info2, data, onResult) {
         if (typeof data === "string") {
-          if (!info3.options.headers) {
-            info3.options.headers = {};
+          if (!info2.options.headers) {
+            info2.options.headers = {};
           }
-          info3.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info2.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -1240,7 +1240,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info3.httpModule.request(info3.options, (msg) => {
+        const req = info2.httpModule.request(info2.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -1252,7 +1252,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info3.options.path}`));
+          handleResult(new Error(`Request timeout: ${info2.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -1279,27 +1279,27 @@ var require_lib = __commonJS({
         return this._getAgent(parsedUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info3 = {};
-        info3.parsedUrl = requestUrl;
-        const usingSsl = info3.parsedUrl.protocol === "https:";
-        info3.httpModule = usingSsl ? https : http;
+        const info2 = {};
+        info2.parsedUrl = requestUrl;
+        const usingSsl = info2.parsedUrl.protocol === "https:";
+        info2.httpModule = usingSsl ? https : http;
         const defaultPort = usingSsl ? 443 : 80;
-        info3.options = {};
-        info3.options.host = info3.parsedUrl.hostname;
-        info3.options.port = info3.parsedUrl.port ? parseInt(info3.parsedUrl.port) : defaultPort;
-        info3.options.path = (info3.parsedUrl.pathname || "") + (info3.parsedUrl.search || "");
-        info3.options.method = method;
-        info3.options.headers = this._mergeHeaders(headers);
+        info2.options = {};
+        info2.options.host = info2.parsedUrl.hostname;
+        info2.options.port = info2.parsedUrl.port ? parseInt(info2.parsedUrl.port) : defaultPort;
+        info2.options.path = (info2.parsedUrl.pathname || "") + (info2.parsedUrl.search || "");
+        info2.options.method = method;
+        info2.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info3.options.headers["user-agent"] = this.userAgent;
+          info2.options.headers["user-agent"] = this.userAgent;
         }
-        info3.options.agent = this._getAgent(info3.parsedUrl);
+        info2.options.agent = this._getAgent(info2.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info3.options);
+            handler.prepareRequest(info2.options);
           }
         }
-        return info3;
+        return info2;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -2143,10 +2143,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       command_1.issueCommand("notice", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
     exports.notice = notice;
-    function info3(message) {
+    function info2(message) {
       process.stdout.write(message + os.EOL);
     }
-    exports.info = info3;
+    exports.info = info2;
     function startGroup(name) {
       command_1.issue("group", name);
     }
@@ -2386,11 +2386,10 @@ var require_io_util = __commonJS({
 });
 
 // src/index.ts
-var import_core2 = __toESM(require_core());
+var import_core = __toESM(require_core());
 
 // src/getChangesDeploymentApi.ts
 var import_http_client = __toESM(require_lib());
-var import_core = __toESM(require_core());
 var import_fs = require("fs");
 function generateHeaders(apiKey) {
   return {
@@ -2400,11 +2399,9 @@ function generateHeaders(apiKey) {
 }
 async function getLatestDeploymentFromApi(baseUrl, apiKey) {
   const generatedUrl = `${baseUrl}?skip=0&take=1`;
-  (0, import_core.info)(generatedUrl);
   const headers = generateHeaders(apiKey);
   const client = new import_http_client.HttpClient();
   var response = await client.getJson(generatedUrl, headers);
-  (0, import_core.info)(`${response.statusCode} - ${JSON.stringify(response.result)}`);
   if (response.statusCode === 200 && response.result !== null) {
     return Promise.resolve(response.result.deployments[0].deploymentId);
   }
@@ -2412,7 +2409,6 @@ async function getLatestDeploymentFromApi(baseUrl, apiKey) {
 }
 async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   const generatedUrl = `${baseUrl}/${latestdeploymentId}/diff`;
-  (0, import_core.info)(generatedUrl);
   const headers = generateHeaders(apiKey);
   const client = new import_http_client.HttpClient();
   const response = await client.get(generatedUrl, headers);
@@ -2424,36 +2420,36 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
     response.message.pipe(file).on("close", () => Promise.resolve());
     return Promise.resolve();
   }
-  return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${response.readBody()} `);
+  return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
 }
 
 // src/index.ts
 var import_io_util = __toESM(require_io_util());
 async function run() {
-  const projectAlias = (0, import_core2.getInput)("project-alias");
-  const apiKey = (0, import_core2.getInput)("api-key");
-  const workspace = (0, import_core2.getInput)("workspace");
+  const projectAlias = (0, import_core.getInput)("project-alias");
+  const apiKey = (0, import_core.getInput)("api-key");
+  const workspace = (0, import_core.getInput)("workspace");
   const baseUrl = `https://api-internal.umbraco.io/projects/${projectAlias}/deployments`;
-  const latestdeploymentId = await getLatestDeploymentFromApi(baseUrl, apiKey).catch((rejected) => (0, import_core2.setFailed)(rejected));
+  const latestdeploymentId = await getLatestDeploymentFromApi(baseUrl, apiKey).catch((rejected) => (0, import_core.setFailed)(rejected));
   if (latestdeploymentId !== null || void 0) {
-    (0, import_core2.info)(latestdeploymentId);
+    (0, import_core.info)(`Found latest deploymentId: ${latestdeploymentId}`);
     const placeForPatch = `${workspace}/download/git-changes.patch`;
-    getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).then(() => success(placeForPatch)).catch((rejected) => (0, import_core2.setFailed)(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
+    getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).then(() => success(placeForPatch)).catch((rejected) => (0, import_core.setFailed)(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
     return;
   }
-  (0, import_core2.info)("No latest deploymentId");
-  (0, import_core2.setOutput)("remote-changes", false);
-  (0, import_core2.setFailed)("fail on purpose fo rnow");
+  (0, import_core.info)("No latest deploymentId");
+  (0, import_core.setOutput)("remote-changes", false);
+  (0, import_core.setFailed)("fail on purpose for now");
 }
 async function success(patchfileLocation) {
   const patchFileExists = await (0, import_io_util.exists)(patchfileLocation);
   if (patchFileExists) {
-    (0, import_core2.warning)(`Changes since last deployment was detected - see ${patchfileLocation}`);
-    (0, import_core2.setOutput)("remote-changes", true);
-    (0, import_core2.setOutput)("git-patch-file", patchfileLocation);
+    (0, import_core.warning)(`Changes since last deployment was detected - see ${patchfileLocation}`);
+    (0, import_core.setOutput)("remote-changes", true);
+    (0, import_core.setOutput)("git-patch-file", patchfileLocation);
     return;
   }
-  (0, import_core2.info)("No remote changes");
-  (0, import_core2.setOutput)("remote-changes", false);
+  (0, import_core.info)("No remote changes");
+  (0, import_core.setOutput)("remote-changes", false);
 }
 run();

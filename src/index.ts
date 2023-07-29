@@ -15,7 +15,7 @@ async function run()
 
     if (latestdeploymentId !== null || undefined){
 
-        info(latestdeploymentId!);
+        info(`Found latest deploymentId: ${latestdeploymentId}`);
 
         const placeForPatch = `${workspace}/download/git-changes.patch`;
 
@@ -27,7 +27,7 @@ async function run()
 
     info("No latest deploymentId");
     setOutput('remote-changes', false);
-    setFailed("fail on purpose fo rnow");
+    setFailed("fail on purpose for now");
 
 }
 
