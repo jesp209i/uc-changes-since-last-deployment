@@ -3293,15 +3293,22 @@ var import_io = __toESM(require_io());
 
 // src/patcher.ts
 var import_exec = __toESM(require_exec());
-function patch(patchFileLocation, githubToken, run2) {
-  const branchName = `auto/merge_remote_changes_for_run_${run2}`;
-  (0, import_exec.exec)("git", ["config", "user.name", "Build pipeline"]);
-  (0, import_exec.exec)("git", ["config", "user.email", "cicd@umbraco.com"]);
-  (0, import_exec.exec)("git", ["switch", "-c", `${branchName}`]);
-  (0, import_exec.exec)("git", ["apply", "-v", `${patchFileLocation}`]);
-  (0, import_exec.exec)("git", ["commit", "-m", `Auto Updated changes from remote for build ${run2}`]);
-  (0, import_exec.exec)("git", ["remote", "add", "tmp-pusher", `https://${githubToken}@github.com/jesp209i/pipelines-r-us`]);
-  (0, import_exec.exec)("git", ["push", "--set-upstream", "tmp-pusher", `${branchName}`]);
+async function patch(patchFileLocation, githubToken, run2) {
+  return new Promise((resolve, reject) => {
+    try {
+      const branchName = `auto/merge_remote_changes_for_run_${run2}`;
+      (0, import_exec.exec)("git", ["config", "user.name", "Build pipeline"]);
+      (0, import_exec.exec)("git", ["config", "user.email", "cicd@umbraco.com"]);
+      (0, import_exec.exec)("git", ["switch", "-c", `${branchName}`]);
+      (0, import_exec.exec)("git", ["apply", "-v", `${patchFileLocation}`]);
+      (0, import_exec.exec)("git", ["commit", "-m", `"Auto Updated changes from remote for build ${run2}"`]);
+      (0, import_exec.exec)("git", ["remote", "add", "tmp-pusher", `https://${githubToken}@github.com/jesp209i/pipelines-r-us`]);
+      (0, import_exec.exec)("git", ["push", "--set-upstream", "tmp-pusher", `${branchName}`]);
+      return resolve();
+    } catch (error) {
+      return reject(error);
+    }
+  });
 }
 
 // src/index.ts
@@ -3330,10 +3337,9 @@ async function run() {
 async function success(patchfileLocation, githubToken, currentRun) {
   const patchFileExists = await (0, import_io_util.exists)(patchfileLocation);
   if (patchFileExists) {
-    patch(patchfileLocation, githubToken, currentRun);
-    (0, import_core2.warning)(`Changes since last deployment was detected - see ${patchfileLocation}`);
     (0, import_core2.setOutput)("REMOTE_CHANGES", "true");
-    (0, import_core2.setOutput)("PATCH_FILE", patchfileLocation);
+    (0, import_core2.warning)(`Changes since last deployment was detected - see ${patchfileLocation}`);
+    await patch(patchfileLocation, githubToken, currentRun);
   } else {
     (0, import_core2.info)("No remote changes");
     (0, import_core2.setOutput)("REMOTE_CHANGES", "false");

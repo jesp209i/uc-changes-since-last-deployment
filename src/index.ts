@@ -44,12 +44,9 @@ async function run()
 async function success(patchfileLocation: string, githubToken: string, currentRun: string){
     const patchFileExists = await exists(patchfileLocation);
     if (patchFileExists){
-        patch(patchfileLocation, githubToken, currentRun);
-
-
-        warning(`Changes since last deployment was detected - see ${patchfileLocation}`);
         setOutput('REMOTE_CHANGES', 'true');
-        setOutput('PATCH_FILE', patchfileLocation);
+        warning(`Changes since last deployment was detected - see ${patchfileLocation}`);
+        await patch(patchfileLocation, githubToken, currentRun);
     } 
     else 
     {
