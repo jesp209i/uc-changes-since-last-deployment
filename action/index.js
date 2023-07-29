@@ -2673,9 +2673,11 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   }
   (0, import_core.info)(JSON.stringify(response));
   if (response.message.statusCode === 200) {
+    (0, import_core.info)(JSON.stringify(response));
     const file = (0, import_fs.createWriteStream)(downloadFolder);
     let data = "";
     response.message.pipe(file);
+    response.message.on("error", (error) => Promise.reject(error));
     file.on("error", (error) => Promise.reject(error));
     file.on("finish", () => (0, import_core.info)("finished reading stream"));
     return Promise.resolve();
