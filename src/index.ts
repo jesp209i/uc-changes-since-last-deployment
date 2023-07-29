@@ -15,7 +15,9 @@ async function run()
     getLatestDeploymentFromApi(baseUrl,apiKey)
     .then(resolve => latestdeploymentId = resolve)
     .catch(rejected => setFailed(rejected));
+    
     info(latestdeploymentId);
+
     const placeForPatch = `${workspace}/download/git-changes.patch`;
 
     getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch)

@@ -29,17 +29,21 @@ function generateHeaders(apiKey:string) : OutgoingHttpHeaders
 
 export async function getLatestDeploymentFromApi(baseUrl: string, apiKey: string): Promise<string>
 {
+    const generatedUrl = `${baseUrl}?skip=0&take=1`;
+
+    debug(generatedUrl);
+
     const headers = generateHeaders(apiKey);
 
     const client = new HttpClient();
-    var response = await client.getJson<DeploymentsResponse>(`${baseUrl}?skip=0&take=1`, headers);
+    var response = await client.getJson<DeploymentsResponse>(generatedUrl, headers);
     debug(`${response.statusCode} - ${JSON.stringify(response.result)}`);
     if (response.statusCode === 200 && response.result !== null)
     {
         return Promise.resolve(response.result.deployments[0].deploymentId);
     }
 
-    return Promise.reject(`Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
+    return Promise.reject(`getLatestDeploymentFromApi: Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
 }
 
 export async function getChanges(baseUrl: string, apiKey: string, latestdeploymentId: string, downloadFolder: string) : Promise<void>
@@ -58,5 +62,5 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
         return Promise.resolve();
     }
 
-    return Promise.reject(`Unexpected response coming from server. ${response.message.statusCode} - ${response.readBody()} `);
+    return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${response.readBody()} `);
 }

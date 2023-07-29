@@ -2399,14 +2399,16 @@ function generateHeaders(apiKey) {
   };
 }
 async function getLatestDeploymentFromApi(baseUrl, apiKey) {
+  const generatedUrl = `${baseUrl}?skip=0&take=1`;
+  (0, import_core.debug)(generatedUrl);
   const headers = generateHeaders(apiKey);
   const client = new import_http_client.HttpClient();
-  var response = await client.getJson(`${baseUrl}?skip=0&take=1`, headers);
+  var response = await client.getJson(generatedUrl, headers);
   (0, import_core.debug)(`${response.statusCode} - ${JSON.stringify(response.result)}`);
   if (response.statusCode === 200 && response.result !== null) {
     return Promise.resolve(response.result.deployments[0].deploymentId);
   }
-  return Promise.reject(`Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
+  return Promise.reject(`getLatestDeploymentFromApi: Unexpected response coming from server. ${response.statusCode} - ${JSON.stringify(response.result)} `);
 }
 async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   const headers = generateHeaders(apiKey);
@@ -2420,7 +2422,7 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
     response.message.pipe(file).on("close", () => Promise.resolve());
     return Promise.resolve();
   }
-  return Promise.reject(`Unexpected response coming from server. ${response.message.statusCode} - ${response.readBody()} `);
+  return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${response.readBody()} `);
 }
 
 // src/index.ts
