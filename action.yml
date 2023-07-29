@@ -11,11 +11,15 @@ inputs:
   workspace:
     description: github workspace
     required: true
+  github-pat-token:
+    description: github token to be able to apply git patch to a branch
+    required: true
+  pipeline-run:
+    description: the name of the current run or version
+    required: true
 outputs:
   REMOTE_CHANGES:
     description: set to true if cloud repo is ahead of latest deployment id
-  PATCH_FILE:
-    description: path to git patch file, with changes since last deployment, if there was any changes in cloud remote since then
 
 runs:
   using: node16
