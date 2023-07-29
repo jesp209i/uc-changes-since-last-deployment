@@ -2434,11 +2434,16 @@ async function run() {
   const apiKey = (0, import_core2.getInput)("api-key");
   const workspace = (0, import_core2.getInput)("workspace");
   const baseUrl = `https://api-internal.umbraco.io/projects/${projectAlias}/deployments`;
-  let latestdeploymentId = "";
-  getLatestDeploymentFromApi(baseUrl, apiKey).then((resolve) => latestdeploymentId = resolve).catch((rejected) => (0, import_core2.setFailed)(rejected));
-  (0, import_core2.info)(latestdeploymentId);
-  const placeForPatch = `${workspace}/download/git-changes.patch`;
-  getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).then(() => success(placeForPatch)).catch((rejected) => (0, import_core2.setFailed)(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
+  const latestdeploymentId = await getLatestDeploymentFromApi(baseUrl, apiKey).catch((rejected) => (0, import_core2.setFailed)(rejected));
+  if (latestdeploymentId !== null || void 0) {
+    (0, import_core2.info)(latestdeploymentId);
+    const placeForPatch = `${workspace}/download/git-changes.patch`;
+    getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).then(() => success(placeForPatch)).catch((rejected) => (0, import_core2.setFailed)(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
+    return;
+  }
+  (0, import_core2.info)("No latest deploymentId");
+  (0, import_core2.setOutput)("remote-changes", false);
+  (0, import_core2.setFailed)("fail on purpose fo rnow");
 }
 async function success(patchfileLocation) {
   const patchFileExists = await (0, import_io_util.exists)(patchfileLocation);

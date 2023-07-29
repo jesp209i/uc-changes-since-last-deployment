@@ -10,20 +10,24 @@ async function run()
 
     const baseUrl = `https://api-internal.umbraco.io/projects/${projectAlias}/deployments`;
 
-    let latestdeploymentId: string = '';
+    const latestdeploymentId = await getLatestDeploymentFromApi(baseUrl,apiKey)
+        .catch(rejected => setFailed(rejected));
 
-    getLatestDeploymentFromApi(baseUrl,apiKey)
-    .then(resolve => latestdeploymentId = resolve)
-    .catch(rejected => setFailed(rejected));
-    
-    info(latestdeploymentId);
+    if (latestdeploymentId !== null || undefined){
 
-    const placeForPatch = `${workspace}/download/git-changes.patch`;
+        info(latestdeploymentId!);
 
-    getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch)
-    .then(()=>success(placeForPatch))
-    .catch(rejected => setFailed(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
+        const placeForPatch = `${workspace}/download/git-changes.patch`;
 
+        getChanges(baseUrl, apiKey, latestdeploymentId!, placeForPatch)
+        .then(()=>success(placeForPatch))
+        .catch(rejected => setFailed(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
+        return;
+    }
+
+    info("No latest deploymentId");
+    setOutput('remote-changes', false);
+    setFailed("fail on purpose fo rnow");
 
 }
 
