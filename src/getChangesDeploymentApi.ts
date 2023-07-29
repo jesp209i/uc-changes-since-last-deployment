@@ -61,7 +61,7 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
         return Promise.resolve();
     }
 
-    info(JSON.stringify(response));
+    info(await response.readBody());
 
     if (response.message.statusCode === 200){
         info(JSON.stringify(response));
@@ -74,8 +74,10 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
             info('finished reading stream');
             file.close(() => Promise.resolve());
         });
-        return Promise.resolve();
     }
-
-    return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
+    else 
+    {
+        //info(`${response.message.statusCode}`);
+        return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
+    }
 }

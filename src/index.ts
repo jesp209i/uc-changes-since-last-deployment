@@ -25,7 +25,7 @@ async function run()
         const placeForPatch = `${downloadPath}/git-changes.patch`;
 
         await getChanges(baseUrl, apiKey, latestdeploymentId!, placeForPatch)
-        .catch(rejected => setFailed(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
+        .catch(rejected => setFailed(`GetDiff - Unable to determine what happened :( ${rejected}`));
 
         success(placeForPatch);
         return;

@@ -2671,7 +2671,7 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
   if (response.message.statusCode === 204) {
     return Promise.resolve();
   }
-  (0, import_core.info)(JSON.stringify(response));
+  (0, import_core.info)(await response.readBody());
   if (response.message.statusCode === 200) {
     (0, import_core.info)(JSON.stringify(response));
     const file = (0, import_fs.createWriteStream)(downloadFolder);
@@ -2683,9 +2683,9 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
       (0, import_core.info)("finished reading stream");
       file.close(() => Promise.resolve());
     });
-    return Promise.resolve();
+  } else {
+    return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
   }
-  return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);
 }
 
 // src/index.ts
@@ -2702,7 +2702,7 @@ async function run() {
     const downloadPath = `${workspace}/download`;
     (0, import_io.mkdirP)(downloadPath);
     const placeForPatch = `${downloadPath}/git-changes.patch`;
-    await getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).catch((rejected) => (0, import_core2.setFailed)(`Unknown Error - unable to determine what happened :( ${JSON.stringify(rejected)}`));
+    await getChanges(baseUrl, apiKey, latestdeploymentId, placeForPatch).catch((rejected) => (0, import_core2.setFailed)(`GetDiff - Unable to determine what happened :( ${rejected}`));
     success(placeForPatch);
     return;
   }
