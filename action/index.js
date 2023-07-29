@@ -2679,7 +2679,10 @@ async function getChanges(baseUrl, apiKey, latestdeploymentId, downloadFolder) {
     response.message.pipe(file);
     response.message.on("error", (error) => Promise.reject(error));
     file.on("error", (error) => Promise.reject(error));
-    file.on("finish", () => (0, import_core.info)("finished reading stream"));
+    file.on("finish", () => {
+      (0, import_core.info)("finished reading stream");
+      file.close(() => Promise.resolve());
+    });
     return Promise.resolve();
   }
   return Promise.reject(`getChanges: Unexpected response coming from server. ${response.message.statusCode} - ${JSON.stringify(response.readBody())} `);

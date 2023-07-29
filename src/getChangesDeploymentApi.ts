@@ -70,7 +70,10 @@ export async function getChanges(baseUrl: string, apiKey: string, latestdeployme
         response.message.pipe(file);
         response.message.on('error', (error)=> Promise.reject(error));
         file.on('error', (error) => Promise.reject(error));
-        file.on('finish', () => info('finished reading stream'))
+        file.on('finish', () => {
+            info('finished reading stream');
+            file.close(() => Promise.resolve());
+        });
         return Promise.resolve();
     }
 
