@@ -20,6 +20,8 @@ inputs:
 outputs:
   REMOTE_CHANGES:
     description: set to true if cloud repo is ahead of latest deployment id
+  PATCH_FILE:
+    description: location of patch file
 
 runs:
   using: node16
